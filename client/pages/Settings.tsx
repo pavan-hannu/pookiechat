@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Button, Form, Input, Switch, Upload } from "antd";
 
 export default function SettingsPage() {
-  const { me, updateSettings } = useAuth() as any;
+  const { me, updateSettings } = useAuth();
   const [theme, setTheme] = useState<string>("light");
   const [avatarUrl, setAvatarUrl] = useState<string>("");
 
