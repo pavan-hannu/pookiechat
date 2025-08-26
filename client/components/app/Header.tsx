@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { Button } from "antd";
 import { useAuth } from "@/store/auth";
 import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
