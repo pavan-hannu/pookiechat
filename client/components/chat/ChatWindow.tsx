@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button, Input } from "antd";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/store/auth";
 import { useChat } from "@/store/chat";
@@ -72,7 +71,7 @@ export default function ChatWindow() {
       <section className="col-span-8 rounded-xl border bg-card flex flex-col">
         <div className="p-3 border-b flex items-center gap-3">
           <h4 className="font-semibold flex-1">{peer ? `Chat with @${peer}` : "Select a person"}</h4>
-          <Input placeholder="Password to unlock inbox" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="max-w-xs" />
+          <Input.Password placeholder="Password to unlock inbox" value={password} onChange={(e) => setPassword(e.target.value)} className="max-w-xs" />
         </div>
         <ScrollArea className="flex-1">
           <div className="p-4 space-y-2">
