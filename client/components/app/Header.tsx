@@ -35,8 +35,11 @@ export default function Header() {
           </Button>
           {me ? (
             <div className="flex items-center gap-3">
+              {me.settings?.avatarUrl ? (
+                <img src={me.settings.avatarUrl} alt="avatar" className="h-8 w-8 rounded-full object-cover" />
+              ) : null}
               <span className="text-sm text-muted-foreground">@{me.id}</span>
-              <Button variant="outline" onClick={logout}>Logout</Button>
+              <Button onClick={logout}>Logout</Button>
             </div>
           ) : (
             <AuthDialog>
