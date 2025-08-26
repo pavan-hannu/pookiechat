@@ -27,6 +27,7 @@ export default function Header() {
         <nav className="hidden md:flex items-center gap-6">
           <NavLink to="/">Home</NavLink>
           <NavLink to="/chat">Chat</NavLink>
+          <NavLink to="/settings">Settings</NavLink>
         </nav>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" aria-label="toggle theme" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
