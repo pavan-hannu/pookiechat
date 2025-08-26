@@ -63,11 +63,19 @@ Dev URL: http://localhost:5173
 
 Key endpoints
 
-- Auth: POST /api/auth/register/, /api/auth/login/, /api/auth/logout/
-- Me/Settings: GET /api/me/, POST /api/settings/, POST /api/accounts/avatar/
-- Users: GET /api/users/search/?q=
+- Auth: POST /api/auth/register/ (with first_name, last_name, profile_visibility), /api/auth/login/, /api/auth/logout/
+- Me/Settings: GET /api/me/, POST /api/settings/, POST /api/profile/, POST /api/accounts/avatar/
+- Users: GET /api/users/search/?q= (searches username, first_name, last_name)
 - Chat: GET /api/conversations/list/, POST /api/conversations/, GET/POST /api/conversations/<uuid>/messages(/post)/
 - Posts: GET /api/posts/?username=..., POST /api/posts/create/
+
+## New Features Added
+
+- **Username Validation**: Only allows letters, numbers, dots (.), and single underscores (_). No double underscores or leading/trailing dots/underscores.
+- **Extended Registration**: First name, last name, and profile visibility (public/followers/private)
+- **Profile Visibility**: Controls who can see your profile and posts
+- **Admin Blocking**: Django Admin can block users permanently or temporarily with custom reasons and end dates
+- **Blocked User Login**: Blocked users see specific error messages with reason and end date (if temporary)
 
 ## Notes
 
