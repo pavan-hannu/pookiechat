@@ -2,11 +2,11 @@ import ChatWindow from "@/components/chat/ChatWindow";
 import Header from "@/components/app/Header";
 import Footer from "@/components/app/Footer";
 import AuthDialog from "@/components/auth/AuthDialog";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/store/auth";
+import { Button } from "antd";
+import { useSession } from "@/store/session";
 
 export default function Index() {
-  const { me } = useAuth();
+  const { me } = useSession();
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
