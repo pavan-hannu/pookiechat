@@ -3,7 +3,7 @@ import Footer from "@/components/app/Footer";
 import ChatWindow from "@/components/chat/ChatWindow";
 import { useSession } from "@/store/session";
 import { useState } from "react";
-import { Button, Input, List, message } from "antd";
+import { Button, Input, List, message, Upload, Select } from "antd";
 import { api } from "@/lib/api";
 
 export default function ChatPage() {
