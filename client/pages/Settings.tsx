@@ -1,11 +1,11 @@
 import Header from "@/components/app/Header";
 import Footer from "@/components/app/Footer";
-import { useAuth } from "@/store/auth";
+import { useSession } from "@/store/session";
 import { useEffect, useState } from "react";
-import { Button, Form, Input, Switch, Upload } from "antd";
+import { Button, Form, Input, Switch, Upload, message } from "antd";
 
 export default function SettingsPage() {
-  const { me, updateSettings } = useAuth();
+  const { me, updateSettings, fetchMe } = useSession();
   const [theme, setTheme] = useState<string>("light");
   const [avatarUrl, setAvatarUrl] = useState<string>("");
 
@@ -16,8 +16,9 @@ export default function SettingsPage() {
     }
   }, [me]);
 
-  function onFinish() {
-    updateSettings({ theme, avatarUrl });
+  async function onFinish() {
+    await updateSettings({ theme });
+    message.success("Saved");
   }
 
   return (
@@ -33,12 +34,17 @@ export default function SettingsPage() {
                 onChange={(v) => setTheme(v ? "dark" : "light")}
               />
             </Form.Item>
-            <Form.Item label="Avatar URL (pookie profile)">
-              <Input
-                value={avatarUrl}
-                onChange={(e) => setAvatarUrl(e.target.value)}
-                placeholder="https://.../avatar.png"
-              />
+            <Form.Item label="Avatar (pookie profile)">
+              <Upload name="file" action="/api/accounts/avatar/" withCredentials showUploadList={false} onChange={(info) => {
+                if (info.file.status === 'done') {
+                  setAvatarUrl(info.file.response.avatarUrl);
+                  fetchMe();
+                  message.success('Avatar updated');
+                }
+              }}>
+                <Button>Upload</Button>
+              </Upload>
+              {avatarUrl && <img src={avatarUrl} alt="avatar" className="mt-3 rounded" style={{ height: 64, width: 64, objectFit: 'cover' }} />}
             </Form.Item>
             <Button type="primary" htmlType="submit">
               Save
