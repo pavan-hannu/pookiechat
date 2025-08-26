@@ -64,9 +64,15 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }
 
-  async function register(username: string, password: string) {
+  async function register(username: string, password: string, firstName?: string, lastName?: string, profileVisibility?: string) {
     try {
-      await api.post("/auth/register/", { username, password });
+      await api.post("/auth/register/", {
+        username,
+        password,
+        first_name: firstName || "",
+        last_name: lastName || "",
+        profile_visibility: profileVisibility || "public"
+      });
       return { ok: true };
     } catch (e: any) {
       return {
