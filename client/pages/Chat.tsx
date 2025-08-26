@@ -47,9 +47,52 @@ export default function ChatPage() {
           </div>
         </div>
 
+        <div className="row g-3 mt-4">
+          <div className="col-md-6">
+            <div className="border rounded p-3">
+              <h5>Create a post</h5>
+              <PostForm />
+            </div>
+          </div>
+        </div>
+
         <ChatWindow />
       </main>
       <Footer />
+    </div>
+  );
+}
+
+function PostForm() {
+  const [text, setText] = useState("");
+  const [visibility, setVisibility] = useState("public");
+  const [file, setFile] = useState<File | null>(null);
+
+  async function submit() {
+    const fd = new FormData();
+    fd.append("text", text);
+    fd.append("visibility", visibility);
+    if (file) fd.append("image", file);
+    await api.post("/posts/create/", fd, { headers: { "Content-Type": "multipart/form-data" } });
+    setText("");
+    setFile(null);
+    message.success("Posted");
+  }
+
+  return (
+    <div className="d-flex flex-column gap-2">
+      <Input.TextArea rows={3} value={text} onChange={(e) => setText(e.target.value)} placeholder="Share something..." />
+      <div className="d-flex gap-2 align-items-center">
+        <Upload beforeUpload={(f) => { setFile(f); return false; }} maxCount={1} accept="image/*">
+          <Button>Attach image</Button>
+        </Upload>
+        <Select value={visibility} onChange={setVisibility} options={[
+          { value: "public", label: "Public" },
+          { value: "followers", label: "Followers" },
+          { value: "private", label: "Private" },
+        ]} style={{ width: 160 }} />
+        <Button type="primary" onClick={submit} disabled={!text && !file}>Post</Button>
+      </div>
     </div>
   );
 }
