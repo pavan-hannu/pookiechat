@@ -103,4 +103,8 @@ def list_posts(request):
         }
         for p in qs
     ]
+    if author != user:
+        for p in qs:
+            p.reach_count = (p.reach_count or 0) + 1
+            p.save(update_fields=["reach_count"])
     return Response(data)
