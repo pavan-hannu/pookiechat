@@ -12,6 +12,9 @@ def me(request):
     return Response({
         "username": u.username,
         "is_staff": u.is_staff,
+        "first_name": p.first_name,
+        "last_name": p.last_name,
+        "profile_visibility": p.profile_visibility,
         "settings": {"theme": p.theme, "avatarUrl": (request.build_absolute_uri(p.avatar.url) if p.avatar else "")},
     })
 
