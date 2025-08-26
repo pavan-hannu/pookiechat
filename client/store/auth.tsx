@@ -99,6 +99,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     del(SESSION_KEY);
   }
 
+  function updateSettings(settings: Partial<NonNullable<User["settings"]>>) {
+    if (!me) return;
+    setUsers((prev) => {
+      const next = prev.map((u) => (u.id === me.id ? { ...u, settings: { ...u.settings, ...settings } } : u));
+      const updated = next.find((u) => u.id === me.id)!;
+      setMe(updated);
+      broadcast({ type: "user-upsert", user: updated });
+      if (updated.settings?.theme === "dark") document.documentElement.classList.add("dark");
+      else document.documentElement.classList.remove("dark");
+      return next;
+    });
+  }
+
   function follow(userId: string) {
     if (!me || me.id === userId) return;
     setUsers((prev) => {
@@ -217,7 +230,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const value = useMemo<AuthState>(
-    () => ({ me, users, requests, login, signup, logout, follow, unfollow, sendRequest, acceptRequest, rejectRequest }),
+    () => ({ me, users, requests, login, signup, logout, follow, unfollow, sendRequest, acceptRequest, rejectRequest, updateSettings }),
     [me, users, requests],
   );
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
