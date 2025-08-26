@@ -74,7 +74,11 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({
   }
 
   async function logout() {
-    await api.post("/auth/logout/");
+    try {
+      await api.post("/auth/logout/");
+    } catch {
+      // Even if logout fails, clear local state
+    }
     setMe(null);
   }
 
