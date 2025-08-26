@@ -7,8 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "antd";
-import { Input } from "antd";
+import { Button, Input, Select } from "antd";
 import { useSession } from "@/store/session";
 
 export default function AuthDialog({
@@ -20,6 +19,9 @@ export default function AuthDialog({
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [profileVisibility, setProfileVisibility] = useState("public");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { register, login } = useSession();
@@ -30,7 +32,7 @@ export default function AuthDialog({
     setError(null);
     try {
       if (mode === "signup") {
-        const res = await register(username, password);
+        const res = await register(username, password, firstName, lastName, profileVisibility);
         if (!res.ok) setError(res.error || "Unable to sign up");
         else {
           const ok = await login(username, password);
@@ -57,7 +59,7 @@ export default function AuthDialog({
           </DialogTitle>
           <DialogDescription>
             {mode === "signup"
-              ? "Create a new account on the server."
+              ? "Join the PookieChat community. Username can only contain letters, numbers, dots, and single underscores."
               : "Use your username and password."}
           </DialogDescription>
         </DialogHeader>
@@ -65,7 +67,7 @@ export default function AuthDialog({
           <div>
             <label className="text-sm">Username</label>
             <Input
-              placeholder="e.g. pookie"
+              placeholder="e.g. pookie_123"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
@@ -79,6 +81,33 @@ export default function AuthDialog({
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
+          {mode === "signup" && (
+            <>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-sm">First Name</label>
+                  <Input placeholder="First" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                </div>
+                <div>
+                  <label className="text-sm">Last Name</label>
+                  <Input placeholder="Last" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                </div>
+              </div>
+              <div>
+                <label className="text-sm">Profile Visibility</label>
+                <Select
+                  value={profileVisibility}
+                  onChange={setProfileVisibility}
+                  style={{ width: '100%' }}
+                  options={[
+                    { value: "public", label: "Public - Anyone can see" },
+                    { value: "followers", label: "Followers Only" },
+                    { value: "private", label: "Private - Only you" },
+                  ]}
+                />
+              </div>
+            </>
+          )}
           {error && <p className="text-sm text-red-500">{error}</p>}
           <div className="flex items-center justify-between pt-2">
             <button
