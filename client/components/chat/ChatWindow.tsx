@@ -1,48 +1,73 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Button, Input } from "antd";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useAuth } from "@/store/auth";
-import { useChat } from "@/store/chat";
+import { useEffect, useRef, useState } from "react";
+import { Button, Input, List } from "antd";
+import { api } from "@/lib/api";
 
 export default function ChatWindow() {
-  const { me, users } = useAuth();
-  const { threads, listDecrypted, send } = useChat();
+  const [me, setMe] = useState<string | null>(null);
+  const [peers, setPeers] = useState<string[]>([]);
   const [peer, setPeer] = useState<string | null>(null);
-  const [password, setPassword] = useState("");
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
-  const [items, setItems] = useState<
-    { id: string; dir: "in" | "out"; text: string; createdAt: number }[]
-  >([]);
+  const [items, setItems] = useState<{ id: string; dir: "in" | "out"; text: string; created_at: string }[]>([]);
 
   useEffect(() => {
-    if (!peer) return;
-    let mounted = true;
-    listDecrypted(peer, password).then((msgs) => mounted && setItems(msgs));
-    const iv = setInterval(() => {
-      listDecrypted(peer, password).then((msgs) => mounted && setItems(msgs));
-    }, 600);
-    return () => {
-      mounted = false;
-      clearInterval(iv);
-    };
-  }, [peer, password, listDecrypted]);
+    async function who() {
+      try {
+        const res = await api.get("/me/");
+        setMe(res.data.username);
+      } catch {}
+    }
+    who();
+  }, []);
 
-  const peers = useMemo(
-    () => users.filter((u) => me && u.id !== me.id),
-    [users, me],
-  );
+  useEffect(() => {
+    let stop = false;
+    async function load() {
+      try {
+        const res = await api.get("/conversations/list/");
+        const list: string[] = Array.from(new Set(res.data.flatMap((c: any) => c.peers)));
+        if (!stop) setPeers(list);
+      } catch {}
+    }
+    load();
+    const iv = setInterval(load, 5000);
+    return () => { stop = true; clearInterval(iv); };
+  }, []);
+
+  useEffect(() => {
+    if (!peer || !me) return;
+    let active = true;
+    async function ensure() {
+      const res = await api.post("/conversations/", { usernames: [me, peer] });
+      if (active) setConversationId(res.data.id);
+    }
+    ensure();
+    return () => { active = false };
+  }, [peer, me]);
+
+  useEffect(() => {
+    if (!conversationId || !me) return;
+    let stop = false;
+    async function fetchMessages() {
+      try {
+        const res = await api.get(`/conversations/${conversationId}/messages/`);
+        const rows = (res.data as any[]).map((m) => ({ id: m.id, dir: m.sender === me ? "out" : "in", text: m.ciphertext, created_at: m.created_at }));
+        if (!stop) setItems(rows);
+      } catch {}
+    }
+    fetchMessages();
+    const iv = setInterval(fetchMessages, 5000);
+    return () => { stop = true; clearInterval(iv); };
+  }, [conversationId, me]);
+
   const endRef = useRef<HTMLDivElement>(null);
-  useEffect(
-    () => endRef.current?.scrollIntoView({ behavior: "smooth" }),
-    [items],
-  );
+  useEffect(() => endRef.current?.scrollIntoView({ behavior: "smooth" }), [items]);
 
   async function onSend(e: React.FormEvent) {
     e.preventDefault();
-    if (!peer || !message.trim()) return;
-    await send(peer, message.trim());
+    if (!peer || !message.trim() || !conversationId) return;
+    await api.post(`/conversations/${conversationId}/messages/post/`, { ciphertext: message.trim() });
     setMessage("");
-    listDecrypted(peer, password).then(setItems);
   }
 
   if (!me)

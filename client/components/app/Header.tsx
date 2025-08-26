@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "antd";
-import { useAuth } from "@/store/auth";
+import { useSession } from "@/store/session";
 import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 import AuthDialog from "@/components/auth/AuthDialog";
