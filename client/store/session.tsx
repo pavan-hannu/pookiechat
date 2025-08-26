@@ -10,6 +10,9 @@ import { api } from "@/lib/api";
 type Me = {
   username: string;
   is_staff: boolean;
+  first_name?: string;
+  last_name?: string;
+  profile_visibility?: string;
   settings?: { theme?: "light" | "dark"; avatarUrl?: string };
 } | null;
 
