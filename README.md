@@ -52,9 +52,12 @@ Dev URL: http://localhost:5173
 
 ## Troubleshooting
 
-- 403 Forbidden loading CSS from node_modules: Fixed by using CDN CSS (see index.html). We removed direct imports from node_modules in App.tsx.
-- API base: frontend uses relative "/api"; proxy to Django if you run behind one, or serve the SPA with the backend in production.
-- Media (avatars/posts): served in DEBUG via /media/. Ensure MEDIA_ROOT writable.
+- **403 Forbidden loading CSS**: Fixed by using CDN CSS (see index.html). We removed direct imports from node_modules in App.tsx.
+- **Logout not working**: Clear browser localStorage/sessionStorage and refresh. The frontend uses session-based auth with Django.
+- **Still seeing "Logout" when not logged in**: This happens if localStorage has stale data. Clear browser storage or hard refresh (Ctrl+F5).
+- **API base**: frontend uses relative "/api"; proxy to Django if you run behind one, or serve the SPA with the backend in production.
+- **Media (avatars/posts)**: served in DEBUG via /media/. Ensure MEDIA_ROOT writable.
+- **Migration needed**: Run `python backend/manage.py makemigrations accounts` then `python backend/manage.py migrate` after pulling new Profile model changes.
 
 ## Project Structure
 
