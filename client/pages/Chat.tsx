@@ -9,7 +9,9 @@ import { api } from "@/lib/api";
 export default function ChatPage() {
   const { me } = useSession();
   const [q, setQ] = useState("");
-  const [results, setResults] = useState<{ username: string; is_staff: boolean }[]>([]);
+  const [results, setResults] = useState<
+    { username: string; is_staff: boolean }[]
+  >([]);
 
   async function onSearch() {
     try {
@@ -35,14 +37,30 @@ export default function ChatPage() {
             <div className="border rounded p-3">
               <h5>Find new pookies</h5>
               <div className="d-flex gap-2 mt-2">
-                <Input placeholder="search usernames" value={q} onChange={(e) => setQ(e.target.value)} />
-                <Button type="primary" onClick={onSearch}>Search</Button>
+                <Input
+                  placeholder="search usernames"
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                />
+                <Button type="primary" onClick={onSearch}>
+                  Search
+                </Button>
               </div>
-              <List className="mt-3" dataSource={results} renderItem={(u) => (
-                <List.Item actions={[<Button key="start" onClick={() => startChat(u.username)}>Start chat</Button>]}>
-                  @{u.username}
-                </List.Item>
-              )} />
+              <List
+                className="mt-3"
+                dataSource={results}
+                renderItem={(u) => (
+                  <List.Item
+                    actions={[
+                      <Button key="start" onClick={() => startChat(u.username)}>
+                        Start chat
+                      </Button>,
+                    ]}
+                  >
+                    @{u.username}
+                  </List.Item>
+                )}
+              />
             </div>
           </div>
         </div>
@@ -73,7 +91,9 @@ function PostForm() {
     fd.append("text", text);
     fd.append("visibility", visibility);
     if (file) fd.append("image", file);
-    await api.post("/posts/create/", fd, { headers: { "Content-Type": "multipart/form-data" } });
+    await api.post("/posts/create/", fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     setText("");
     setFile(null);
     message.success("Posted");
@@ -81,17 +101,36 @@ function PostForm() {
 
   return (
     <div className="d-flex flex-column gap-2">
-      <Input.TextArea rows={3} value={text} onChange={(e) => setText(e.target.value)} placeholder="Share something..." />
+      <Input.TextArea
+        rows={3}
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Share something..."
+      />
       <div className="d-flex gap-2 align-items-center">
-        <Upload beforeUpload={(f) => { setFile(f); return false; }} maxCount={1} accept="image/*">
+        <Upload
+          beforeUpload={(f) => {
+            setFile(f);
+            return false;
+          }}
+          maxCount={1}
+          accept="image/*"
+        >
           <Button>Attach image</Button>
         </Upload>
-        <Select value={visibility} onChange={setVisibility} options={[
-          { value: "public", label: "Public" },
-          { value: "followers", label: "Followers" },
-          { value: "private", label: "Private" },
-        ]} style={{ width: 160 }} />
-        <Button type="primary" onClick={submit} disabled={!text && !file}>Post</Button>
+        <Select
+          value={visibility}
+          onChange={setVisibility}
+          options={[
+            { value: "public", label: "Public" },
+            { value: "followers", label: "Followers" },
+            { value: "private", label: "Private" },
+          ]}
+          style={{ width: 160 }}
+        />
+        <Button type="primary" onClick={submit} disabled={!text && !file}>
+          Post
+        </Button>
       </div>
     </div>
   );

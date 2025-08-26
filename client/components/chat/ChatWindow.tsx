@@ -8,7 +8,9 @@ export default function ChatWindow() {
   const [peer, setPeer] = useState<string | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
-  const [items, setItems] = useState<{ id: string; dir: "in" | "out"; text: string; created_at: string }[]>([]);
+  const [items, setItems] = useState<
+    { id: string; dir: "in" | "out"; text: string; created_at: string }[]
+  >([]);
 
   useEffect(() => {
     async function who() {
@@ -25,13 +27,18 @@ export default function ChatWindow() {
     async function load() {
       try {
         const res = await api.get("/conversations/list/");
-        const list: string[] = Array.from(new Set(res.data.flatMap((c: any) => c.peers)));
+        const list: string[] = Array.from(
+          new Set(res.data.flatMap((c: any) => c.peers)),
+        );
         if (!stop) setPeers(list);
       } catch {}
     }
     load();
     const iv = setInterval(load, 5000);
-    return () => { stop = true; clearInterval(iv); };
+    return () => {
+      stop = true;
+      clearInterval(iv);
+    };
   }, []);
 
   useEffect(() => {
@@ -42,7 +49,9 @@ export default function ChatWindow() {
       if (active) setConversationId(res.data.id);
     }
     ensure();
-    return () => { active = false };
+    return () => {
+      active = false;
+    };
   }, [peer, me]);
 
   useEffect(() => {
@@ -51,27 +60,44 @@ export default function ChatWindow() {
     async function fetchMessages() {
       try {
         const res = await api.get(`/conversations/${conversationId}/messages/`);
-        const rows = (res.data as any[]).map((m) => ({ id: m.id, dir: m.sender === me ? "out" : "in", text: m.ciphertext, created_at: m.created_at }));
+        const rows = (res.data as any[]).map((m) => ({
+          id: m.id,
+          dir: m.sender === me ? "out" : "in",
+          text: m.ciphertext,
+          created_at: m.created_at,
+        }));
         if (!stop) setItems(rows);
       } catch {}
     }
     fetchMessages();
     const iv = setInterval(fetchMessages, 5000);
-    return () => { stop = true; clearInterval(iv); };
+    return () => {
+      stop = true;
+      clearInterval(iv);
+    };
   }, [conversationId, me]);
 
   const endRef = useRef<HTMLDivElement>(null);
-  useEffect(() => endRef.current?.scrollIntoView({ behavior: "smooth" }), [items]);
+  useEffect(
+    () => endRef.current?.scrollIntoView({ behavior: "smooth" }),
+    [items],
+  );
 
   async function onSend(e: React.FormEvent) {
     e.preventDefault();
     if (!peer || !message.trim() || !conversationId) return;
-    await api.post(`/conversations/${conversationId}/messages/post/`, { ciphertext: message.trim() });
+    await api.post(`/conversations/${conversationId}/messages/post/`, {
+      ciphertext: message.trim(),
+    });
     setMessage("");
   }
 
   if (!me)
-    return <div className="p-3 text-muted-foreground">Sign in to start chatting.</div>;
+    return (
+      <div className="p-3 text-muted-foreground">
+        Sign in to start chatting.
+      </div>
+    );
 
   return (
     <div className="row" style={{ height: 540 }}>
@@ -84,7 +110,13 @@ export default function ChatWindow() {
           dataSource={peers}
           locale={{ emptyText: "No conversations yet" }}
           renderItem={(u) => (
-            <List.Item onClick={() => setPeer(u)} style={{ cursor: "pointer", background: peer === u ? "#f0f5ff" : undefined }}>
+            <List.Item
+              onClick={() => setPeer(u)}
+              style={{
+                cursor: "pointer",
+                background: peer === u ? "#f0f5ff" : undefined,
+              }}
+            >
               @{u}
             </List.Item>
           )}
@@ -94,21 +126,48 @@ export default function ChatWindow() {
 
       <section className="col-8 d-flex flex-column">
         <div className="border rounded p-2 d-flex align-items-center mb-2">
-          <h5 className="m-0 flex-grow-1">{peer ? `Chat with @${peer}` : "Select a person"}</h5>
+          <h5 className="m-0 flex-grow-1">
+            {peer ? `Chat with @${peer}` : "Select a person"}
+          </h5>
         </div>
-        <div className="border rounded p-2 flex-grow-1" style={{ overflowY: "auto" }}>
+        <div
+          className="border rounded p-2 flex-grow-1"
+          style={{ overflowY: "auto" }}
+        >
           {!peer && <p className="text-muted">Choose a recipient to begin.</p>}
-          {peer && items.map((m) => (
-            <div key={m.id} className={"p-2 mb-2 rounded-3 text-sm " + (m.dir === "out" ? "ms-auto bg-primary text-white" : "bg-light")} style={{ maxWidth: "80%" }}>
-              <div>{m.text}</div>
-              <small className="opacity-75">{new Date(m.created_at).toLocaleTimeString()}</small>
-            </div>
-          ))}
+          {peer &&
+            items.map((m) => (
+              <div
+                key={m.id}
+                className={
+                  "p-2 mb-2 rounded-3 text-sm " +
+                  (m.dir === "out"
+                    ? "ms-auto bg-primary text-white"
+                    : "bg-light")
+                }
+                style={{ maxWidth: "80%" }}
+              >
+                <div>{m.text}</div>
+                <small className="opacity-75">
+                  {new Date(m.created_at).toLocaleTimeString()}
+                </small>
+              </div>
+            ))}
           <div ref={endRef} />
         </div>
         <form onSubmit={onSend} className="d-flex gap-2 mt-2">
-          <Input placeholder="Type a message" value={message} onChange={(e) => setMessage(e.target.value)} />
-          <Button type="primary" htmlType="submit" disabled={!peer || !message.trim()}>Send</Button>
+          <Input
+            placeholder="Type a message"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+          />
+          <Button
+            type="primary"
+            htmlType="submit"
+            disabled={!peer || !message.trim()}
+          >
+            Send
+          </Button>
         </form>
       </section>
     </div>

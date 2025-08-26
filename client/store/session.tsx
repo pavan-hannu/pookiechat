@@ -1,20 +1,38 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { api } from "@/lib/api";
 
-type Me = { username: string; is_staff: boolean; settings?: { theme?: "light" | "dark"; avatarUrl?: string } } | null;
+type Me = {
+  username: string;
+  is_staff: boolean;
+  settings?: { theme?: "light" | "dark"; avatarUrl?: string };
+} | null;
 
 type SessionState = {
   me: Me;
   fetchMe: () => Promise<void>;
   login: (username: string, password: string) => Promise<boolean>;
-  register: (username: string, password: string) => Promise<{ ok: boolean; error?: string }>;
+  register: (
+    username: string,
+    password: string,
+  ) => Promise<{ ok: boolean; error?: string }>;
   logout: () => Promise<void>;
-  updateSettings: (settings: { theme?: "light" | "dark"; avatarUrl?: string }) => Promise<void>;
+  updateSettings: (settings: {
+    theme?: "light" | "dark";
+    avatarUrl?: string;
+  }) => Promise<void>;
 };
 
 const Ctx = createContext<SessionState | null>(null);
 
-export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [me, setMe] = useState<Me>(null);
 
   const fetchMe = async () => {
@@ -48,7 +66,10 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       await api.post("/auth/register/", { username, password });
       return { ok: true };
     } catch (e: any) {
-      return { ok: false, error: e?.response?.data?.error || "Unable to register" };
+      return {
+        ok: false,
+        error: e?.response?.data?.error || "Unable to register",
+      };
     }
   }
 
@@ -57,12 +78,18 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setMe(null);
   }
 
-  async function updateSettings(settings: { theme?: "light" | "dark"; avatarUrl?: string }) {
+  async function updateSettings(settings: {
+    theme?: "light" | "dark";
+    avatarUrl?: string;
+  }) {
     await api.post("/settings/", settings);
     await fetchMe();
   }
 
-  const value = useMemo(() => ({ me, fetchMe, login, register, logout, updateSettings }), [me]);
+  const value = useMemo(
+    () => ({ me, fetchMe, login, register, logout, updateSettings }),
+    [me],
+  );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 };
 

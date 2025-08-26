@@ -35,16 +35,29 @@ export default function SettingsPage() {
               />
             </Form.Item>
             <Form.Item label="Avatar (pookie profile)">
-              <Upload name="file" action="/api/accounts/avatar/" withCredentials showUploadList={false} onChange={(info) => {
-                if (info.file.status === 'done') {
-                  setAvatarUrl(info.file.response.avatarUrl);
-                  fetchMe();
-                  message.success('Avatar updated');
-                }
-              }}>
+              <Upload
+                name="file"
+                action="/api/accounts/avatar/"
+                withCredentials
+                showUploadList={false}
+                onChange={(info) => {
+                  if (info.file.status === "done") {
+                    setAvatarUrl(info.file.response.avatarUrl);
+                    fetchMe();
+                    message.success("Avatar updated");
+                  }
+                }}
+              >
                 <Button>Upload</Button>
               </Upload>
-              {avatarUrl && <img src={avatarUrl} alt="avatar" className="mt-3 rounded" style={{ height: 64, width: 64, objectFit: 'cover' }} />}
+              {avatarUrl && (
+                <img
+                  src={avatarUrl}
+                  alt="avatar"
+                  className="mt-3 rounded"
+                  style={{ height: 64, width: 64, objectFit: "cover" }}
+                />
+              )}
             </Form.Item>
             <Button type="primary" htmlType="submit">
               Save
