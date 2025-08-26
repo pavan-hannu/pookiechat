@@ -28,6 +28,24 @@ def update_settings(request):
     p.save()
     return Response({"ok": True})
 
+@api_view(["POST"])  # update profile info
+@permission_classes([IsAuthenticated])
+def update_profile(request):
+    p = request.user.profile
+    first_name = request.data.get("first_name")
+    last_name = request.data.get("last_name")
+    profile_visibility = request.data.get("profile_visibility")
+
+    if isinstance(first_name, str):
+        p.first_name = first_name.strip()
+    if isinstance(last_name, str):
+        p.last_name = last_name.strip()
+    if profile_visibility in ["public", "followers", "private"]:
+        p.profile_visibility = profile_visibility
+
+    p.save()
+    return Response({"ok": True})
+
 @api_view(["POST"])  # upload avatar
 @permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser, FormParser])
