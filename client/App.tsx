@@ -1,6 +1,4 @@
 import "./global.css";
-import "antd/dist/reset.css";
-import "bootstrap/dist/css/bootstrap.min.css";
 
 import { Toaster } from "@/components/ui/toaster";
 import { createRoot } from "react-dom/client";
