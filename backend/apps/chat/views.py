@@ -6,6 +6,20 @@ from django.shortcuts import get_object_or_404
 from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
 
+@api_view(["GET"])  # list my conversations
+@permission_classes([IsAuthenticated])
+def list_conversations(request):
+    convs = Conversation.objects.filter(participants=request.user).order_by("-created_at")
+    data = [
+        {
+            **ConversationSerializer(c).data,
+            "peers": [u.username for u in c.participants.all() if u != request.user],
+            "last_at": c.messages.last().created_at.isoformat() if c.messages.exists() else None,
+        }
+        for c in convs
+    ]
+    return Response(data)
+
 @api_view(["POST"])  # create/get conversation between two usernames
 @permission_classes([IsAuthenticated])
 def get_or_create_conversation(request):
