@@ -19,7 +19,10 @@ function base64ToBuf(b64: string): ArrayBuffer {
   return buf.buffer;
 }
 
-export async function generateKeyPair(): Promise<{ publicJwk: Jwk; privateJwk: Jwk }> {
+export async function generateKeyPair(): Promise<{
+  publicJwk: Jwk;
+  privateJwk: Jwk;
+}> {
   const keyPair = await crypto.subtle.generateKey(
     {
       name: "RSA-OAEP",
@@ -30,8 +33,14 @@ export async function generateKeyPair(): Promise<{ publicJwk: Jwk; privateJwk: J
     true,
     ["encrypt", "decrypt"],
   );
-  const publicJwk = (await crypto.subtle.exportKey("jwk", keyPair.publicKey)) as Jwk;
-  const privateJwk = (await crypto.subtle.exportKey("jwk", keyPair.privateKey)) as Jwk;
+  const publicJwk = (await crypto.subtle.exportKey(
+    "jwk",
+    keyPair.publicKey,
+  )) as Jwk;
+  const privateJwk = (await crypto.subtle.exportKey(
+    "jwk",
+    keyPair.privateKey,
+  )) as Jwk;
   return { publicJwk, privateJwk };
 }
 
@@ -55,7 +64,10 @@ export async function importPrivateKey(jwk: Jwk): Promise<CryptoKey> {
   );
 }
 
-export async function encryptFor(publicJwk: Jwk, plaintext: string): Promise<string> {
+export async function encryptFor(
+  publicJwk: Jwk,
+  plaintext: string,
+): Promise<string> {
   const pub = await importPublicKey(publicJwk);
   const cipher = await crypto.subtle.encrypt(
     { name: "RSA-OAEP" },
@@ -65,7 +77,10 @@ export async function encryptFor(publicJwk: Jwk, plaintext: string): Promise<str
   return bufToBase64(cipher);
 }
 
-export async function decryptWith(privateJwk: Jwk, ciphertextB64: string): Promise<string> {
+export async function decryptWith(
+  privateJwk: Jwk,
+  ciphertextB64: string,
+): Promise<string> {
   const priv = await importPrivateKey(privateJwk);
   const plain = await crypto.subtle.decrypt(
     { name: "RSA-OAEP" },
@@ -76,7 +91,10 @@ export async function decryptWith(privateJwk: Jwk, ciphertextB64: string): Promi
 }
 
 // Private key protection using passphrase
-async function deriveAesKey(passphrase: string, salt: Uint8Array): Promise<CryptoKey> {
+async function deriveAesKey(
+  passphrase: string,
+  salt: Uint8Array,
+): Promise<CryptoKey> {
   const baseKey = await crypto.subtle.importKey(
     "raw",
     textEncoder.encode(passphrase),
@@ -98,21 +116,43 @@ async function deriveAesKey(passphrase: string, salt: Uint8Array): Promise<Crypt
   );
 }
 
-export type SealedPrivateKey = { saltB64: string; ivB64: string; dataB64: string };
+export type SealedPrivateKey = {
+  saltB64: string;
+  ivB64: string;
+  dataB64: string;
+};
 
-export async function sealPrivateKey(privateJwk: Jwk, passphrase: string): Promise<SealedPrivateKey> {
+export async function sealPrivateKey(
+  privateJwk: Jwk,
+  passphrase: string,
+): Promise<SealedPrivateKey> {
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const key = await deriveAesKey(passphrase, salt);
   const payload = JSON.stringify(privateJwk);
-  const data = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, textEncoder.encode(payload));
-  return { saltB64: bufToBase64(salt), ivB64: bufToBase64(iv), dataB64: bufToBase64(data) };
+  const data = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    textEncoder.encode(payload),
+  );
+  return {
+    saltB64: bufToBase64(salt),
+    ivB64: bufToBase64(iv),
+    dataB64: bufToBase64(data),
+  };
 }
 
-export async function openPrivateKey(sealed: SealedPrivateKey, passphrase: string): Promise<Jwk> {
+export async function openPrivateKey(
+  sealed: SealedPrivateKey,
+  passphrase: string,
+): Promise<Jwk> {
   const salt = new Uint8Array(base64ToBuf(sealed.saltB64));
   const iv = new Uint8Array(base64ToBuf(sealed.ivB64));
   const key = await deriveAesKey(passphrase, salt);
-  const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, base64ToBuf(sealed.dataB64));
+  const plain = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv },
+    key,
+    base64ToBuf(sealed.dataB64),
+  );
   return JSON.parse(textDecoder.decode(plain));
 }

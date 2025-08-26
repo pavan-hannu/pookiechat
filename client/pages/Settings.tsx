@@ -28,12 +28,21 @@ export default function SettingsPage() {
           <h2 className="text-2xl font-bold">Settings</h2>
           <Form layout="vertical" className="mt-6" onFinish={onFinish}>
             <Form.Item label="Dark mode">
-              <Switch checked={theme === "dark"} onChange={(v) => setTheme(v ? "dark" : "light")} />
+              <Switch
+                checked={theme === "dark"}
+                onChange={(v) => setTheme(v ? "dark" : "light")}
+              />
             </Form.Item>
             <Form.Item label="Avatar URL (pookie profile)">
-              <Input value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} placeholder="https://.../avatar.png" />
+              <Input
+                value={avatarUrl}
+                onChange={(e) => setAvatarUrl(e.target.value)}
+                placeholder="https://.../avatar.png"
+              />
             </Form.Item>
-            <Button type="primary" htmlType="submit">Save</Button>
+            <Button type="primary" htmlType="submit">
+              Save
+            </Button>
           </Form>
         </div>
       </main>

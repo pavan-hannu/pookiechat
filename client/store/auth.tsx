@@ -1,5 +1,17 @@
-import React, { createContext, useContext, useMemo, useState, useEffect } from "react";
-import { Jwk, SealedPrivateKey, generateKeyPair, openPrivateKey, sealPrivateKey } from "@/lib/crypto";
+import React, {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  useEffect,
+} from "react";
+import {
+  Jwk,
+  SealedPrivateKey,
+  generateKeyPair,
+  openPrivateKey,
+  sealPrivateKey,
+} from "@/lib/crypto";
 import { readJSON, writeJSON, del } from "@/lib/storage";
 
 export type User = {
@@ -13,14 +25,23 @@ export type User = {
   role?: "admin" | "user";
 };
 
-export type FriendRequest = { id: string; from: string; to: string; status: "pending" | "accepted" | "rejected"; createdAt: number };
+export type FriendRequest = {
+  id: string;
+  from: string;
+  to: string;
+  status: "pending" | "accepted" | "rejected";
+  createdAt: number;
+};
 
 type AuthState = {
   me: User | null;
   users: User[];
   requests: FriendRequest[];
   login: (id: string, password: string) => Promise<boolean>;
-  signup: (id: string, password: string) => Promise<{ ok: boolean; error?: string }>;
+  signup: (
+    id: string,
+    password: string,
+  ) => Promise<{ ok: boolean; error?: string }>;
   logout: () => void;
   follow: (userId: string) => void;
   unfollow: (userId: string) => void;
@@ -36,7 +57,9 @@ const REQ_KEY = "app.friendRequests";
 
 const AuthCtx = createContext<AuthState | null>(null);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [users, setUsers] = useState<User[]>(() => {
     const existing = readJSON<User[]>(USERS_KEY, []);
     if (existing.length > 0) return existing;
@@ -49,11 +72,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         followers: [],
         blocked: false,
         role: "admin",
-        settings: { theme: "light", avatarUrl: "https://api.dicebear.com/9.x/fun-emoji/svg?seed=pookie" },
+        settings: {
+          theme: "light",
+          avatarUrl: "https://api.dicebear.com/9.x/fun-emoji/svg?seed=pookie",
+        },
       },
     ] as unknown as User[];
   });
-  const [requests, setRequests] = useState<FriendRequest[]>(() => readJSON<FriendRequest[]>(REQ_KEY, []));
+  const [requests, setRequests] = useState<FriendRequest[]>(() =>
+    readJSON<FriendRequest[]>(REQ_KEY, []),
+  );
   const [me, setMe] = useState<User | null>(() => {
     const id = readJSON<string | null>(SESSION_KEY, null);
     if (!id) return null;
@@ -67,12 +95,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   async function signup(id: string, password: string) {
     id = id.trim().toLowerCase();
-    if (!id || !password) return { ok: false, error: "Username and password required" };
-    if (users.some((u) => u.id === id)) return { ok: false, error: "Username already exists" };
+    if (!id || !password)
+      return { ok: false, error: "Username and password required" };
+    if (users.some((u) => u.id === id))
+      return { ok: false, error: "Username already exists" };
 
     const { publicJwk, privateJwk } = await generateKeyPair();
     const sealed = await sealPrivateKey(privateJwk, password);
-    const user: User = { id, publicKey: publicJwk, sealedPrivateKey: sealed, following: [], followers: [], blocked: false };
+    const user: User = {
+      id,
+      publicKey: publicJwk,
+      sealedPrivateKey: sealed,
+      following: [],
+      followers: [],
+      blocked: false,
+    };
     const next = [...users, user];
     setUsers(next);
     setMe(user);
@@ -102,11 +139,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   function updateSettings(settings: Partial<NonNullable<User["settings"]>>) {
     if (!me) return;
     setUsers((prev) => {
-      const next = prev.map((u) => (u.id === me.id ? { ...u, settings: { ...u.settings, ...settings } } : u));
+      const next = prev.map((u) =>
+        u.id === me.id ? { ...u, settings: { ...u.settings, ...settings } } : u,
+      );
       const updated = next.find((u) => u.id === me.id)!;
       setMe(updated);
       broadcast({ type: "user-upsert", user: updated });
-      if (updated.settings?.theme === "dark") document.documentElement.classList.add("dark");
+      if (updated.settings?.theme === "dark")
+        document.documentElement.classList.add("dark");
       else document.documentElement.classList.remove("dark");
       return next;
     });
@@ -122,11 +162,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         u.id === a.id
           ? { ...u, following: Array.from(new Set([...u.following, userId])) }
           : u.id === b.id
-          ? { ...u, followers: Array.from(new Set([...u.followers, me.id])) }
-          : u,
+            ? { ...u, followers: Array.from(new Set([...u.followers, me.id])) }
+            : u,
       );
-      broadcast({ type: "user-upsert", user: next.find((u) => u.id === a.id)! });
-      broadcast({ type: "user-upsert", user: next.find((u) => u.id === b.id)! });
+      broadcast({
+        type: "user-upsert",
+        user: next.find((u) => u.id === a.id)!,
+      });
+      broadcast({
+        type: "user-upsert",
+        user: next.find((u) => u.id === b.id)!,
+      });
       if (me && me.id === a.id) setMe(next.find((u) => u.id === a.id)!);
       return next;
     });
@@ -142,11 +188,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         u.id === a.id
           ? { ...u, following: u.following.filter((x) => x !== userId) }
           : u.id === b.id
-          ? { ...u, followers: u.followers.filter((x) => x !== me.id) }
-          : u,
+            ? { ...u, followers: u.followers.filter((x) => x !== me.id) }
+            : u,
       );
-      broadcast({ type: "user-upsert", user: next.find((u) => u.id === a.id)! });
-      broadcast({ type: "user-upsert", user: next.find((u) => u.id === b.id)! });
+      broadcast({
+        type: "user-upsert",
+        user: next.find((u) => u.id === a.id)!,
+      });
+      broadcast({
+        type: "user-upsert",
+        user: next.find((u) => u.id === b.id)!,
+      });
       if (me && me.id === a.id) setMe(next.find((u) => u.id === a.id)!);
       return next;
     });
@@ -154,7 +206,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   function sendRequest(to: string) {
     if (!me || me.id === to) return;
-    const req: FriendRequest = { id: crypto.randomUUID(), from: me.id, to, status: "pending", createdAt: Date.now() };
+    const req: FriendRequest = {
+      id: crypto.randomUUID(),
+      from: me.id,
+      to,
+      status: "pending",
+      createdAt: Date.now(),
+    };
     setRequests((prev) => {
       const next = [...prev, req];
       broadcast({ type: "friend-request", request: req });
@@ -164,7 +222,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   function acceptRequest(reqId: string) {
     setRequests((prev) => {
-      const next = prev.map((r) => (r.id === reqId ? { ...r, status: "accepted" } : r));
+      const next = prev.map((r) =>
+        r.id === reqId ? { ...r, status: "accepted" } : r,
+      );
       const r = next.find((x) => x.id === reqId);
       if (r) {
         // auto-follow both on accept
@@ -178,13 +238,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               if (!fromUser || !toUser) return uPrev;
               const nextU = uPrev.map((u) =>
                 u.id === fromUser.id
-                  ? { ...u, following: Array.from(new Set([...u.following, r.to])) }
+                  ? {
+                      ...u,
+                      following: Array.from(new Set([...u.following, r.to])),
+                    }
                   : u.id === toUser.id
-                  ? { ...u, followers: Array.from(new Set([...u.followers, r.from])) }
-                  : u,
+                    ? {
+                        ...u,
+                        followers: Array.from(
+                          new Set([...u.followers, r.from]),
+                        ),
+                      }
+                    : u,
               );
-              broadcast({ type: "user-upsert", user: nextU.find((u) => u.id === fromUser.id)! });
-              broadcast({ type: "user-upsert", user: nextU.find((u) => u.id === toUser.id)! });
+              broadcast({
+                type: "user-upsert",
+                user: nextU.find((u) => u.id === fromUser.id)!,
+              });
+              broadcast({
+                type: "user-upsert",
+                user: nextU.find((u) => u.id === toUser.id)!,
+              });
               return nextU;
             });
           }
@@ -197,7 +271,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   function rejectRequest(reqId: string) {
     setRequests((prev) => {
-      const next = prev.map((r) => (r.id === reqId ? { ...r, status: "rejected" } : r));
+      const next = prev.map((r) =>
+        r.id === reqId ? { ...r, status: "rejected" } : r,
+      );
       const r = next.find((x) => x.id === reqId)!;
       broadcast({ type: "friend-request-update", request: r });
       return next;
@@ -220,9 +296,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return [...prev, ev.user];
         });
       } else if (ev.type === "friend-request") {
-        setRequests((prev) => (prev.some((r) => r.id === ev.request.id) ? prev : [...prev, ev.request]));
+        setRequests((prev) =>
+          prev.some((r) => r.id === ev.request.id)
+            ? prev
+            : [...prev, ev.request],
+        );
       } else if (ev.type === "friend-request-update") {
-        setRequests((prev) => prev.map((r) => (r.id === ev.request.id ? ev.request : r)));
+        setRequests((prev) =>
+          prev.map((r) => (r.id === ev.request.id ? ev.request : r)),
+        );
       }
     };
     ch.addEventListener("message", onMsg);
@@ -230,7 +312,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const value = useMemo<AuthState>(
-    () => ({ me, users, requests, login, signup, logout, follow, unfollow, sendRequest, acceptRequest, rejectRequest, updateSettings }),
+    () => ({
+      me,
+      users,
+      requests,
+      login,
+      signup,
+      logout,
+      follow,
+      unfollow,
+      sendRequest,
+      acceptRequest,
+      rejectRequest,
+      updateSettings,
+    }),
     [me, users, requests],
   );
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;

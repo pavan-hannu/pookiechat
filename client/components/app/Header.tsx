@@ -7,9 +7,13 @@ import AuthDialog from "@/components/auth/AuthDialog";
 
 export default function Header() {
   const { me, logout } = useAuth();
-  const [theme, setTheme] = useState<string>(() => (
-    typeof document === "undefined" ? "light" : (document.documentElement.classList.contains("dark") ? "dark" : "light")
-  ));
+  const [theme, setTheme] = useState<string>(() =>
+    typeof document === "undefined"
+      ? "light"
+      : document.documentElement.classList.contains("dark")
+        ? "dark"
+        : "light",
+  );
   const location = useLocation();
 
   useEffect(() => {
@@ -22,7 +26,9 @@ export default function Header() {
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent" />
-          <span className="font-extrabold text-xl tracking-tight">PookieChat</span>
+          <span className="font-extrabold text-xl tracking-tight">
+            PookieChat
+          </span>
         </Link>
         <nav className="hidden md:flex items-center gap-6">
           <NavLink to="/">Home</NavLink>
@@ -30,13 +36,22 @@ export default function Header() {
           <NavLink to="/settings">Settings</NavLink>
         </nav>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" aria-label="toggle theme" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="toggle theme"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          >
             {theme === "dark" ? <Sun /> : <Moon />}
           </Button>
           {me ? (
             <div className="flex items-center gap-3">
               {me.settings?.avatarUrl ? (
-                <img src={me.settings.avatarUrl} alt="avatar" className="h-8 w-8 rounded-full object-cover" />
+                <img
+                  src={me.settings.avatarUrl}
+                  alt="avatar"
+                  className="h-8 w-8 rounded-full object-cover"
+                />
               ) : null}
               <span className="text-sm text-muted-foreground">@{me.id}</span>
               <Button onClick={logout}>Logout</Button>
@@ -56,6 +71,14 @@ function NavLink({ to, children }: { to: string; children: React.ReactNode }) {
   const { pathname } = useLocation();
   const active = pathname === to;
   return (
-    <Link to={to} className={"text-sm font-medium hover:text-primary transition-colors " + (active ? "text-primary" : "text-muted-foreground")}>{children}</Link>
+    <Link
+      to={to}
+      className={
+        "text-sm font-medium hover:text-primary transition-colors " +
+        (active ? "text-primary" : "text-muted-foreground")
+      }
+    >
+      {children}
+    </Link>
   );
 }

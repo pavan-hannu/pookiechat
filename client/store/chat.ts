@@ -15,7 +15,9 @@ const MSG_KEY = "app.messages";
 
 export function useChat() {
   const { me, users } = useAuth();
-  const [messages, setMessages] = useState<Message[]>(() => readJSON<Message[]>(MSG_KEY, []));
+  const [messages, setMessages] = useState<Message[]>(() =>
+    readJSON<Message[]>(MSG_KEY, []),
+  );
 
   useEffect(() => writeJSON(MSG_KEY, messages), [messages]);
 
@@ -23,7 +25,9 @@ export function useChat() {
     const ch = new BroadcastChannel("app.chat");
     const onMsg = (e: MessageEvent) => {
       const m = e.data as Message;
-      setMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]));
+      setMessages((prev) =>
+        prev.some((x) => x.id === m.id) ? prev : [...prev, m],
+      );
     };
     ch.addEventListener("message", onMsg);
     return () => ch.removeEventListener("message", onMsg);
@@ -34,7 +38,13 @@ export function useChat() {
     const recipient = users.find((u) => u.id === to);
     if (!recipient) throw new Error("Recipient not found");
     const cipherText = await encryptFor(recipient.publicKey as Jwk, plaintext);
-    const m: Message = { id: crypto.randomUUID(), from: me.id, to, cipherText, createdAt: Date.now() };
+    const m: Message = {
+      id: crypto.randomUUID(),
+      from: me.id,
+      to,
+      cipherText,
+      createdAt: Date.now(),
+    };
     setMessages((prev) => [...prev, m]);
     const ch = new BroadcastChannel("app.chat");
     ch.postMessage(m);
@@ -51,32 +61,64 @@ export function useChat() {
     return Array.from(ids).map((peer) => ({
       peer,
       lastAt: messages
-        .filter((m) => (m.from === me.id && m.to === peer) || (m.to === me.id && m.from === peer))
+        .filter(
+          (m) =>
+            (m.from === me.id && m.to === peer) ||
+            (m.to === me.id && m.from === peer),
+        )
         .reduce((acc, m) => Math.max(acc, m.createdAt), 0),
     }));
   }, [messages, me]);
 
   async function listDecrypted(peer: string, password: string) {
-    if (!me) return [] as { id: string; dir: "in" | "out"; text: string; createdAt: number }[];
+    if (!me)
+      return [] as {
+        id: string;
+        dir: "in" | "out";
+        text: string;
+        createdAt: number;
+      }[];
     const mine = messages.filter(
-      (m) => (m.from === me.id && m.to === peer) || (m.to === me.id && m.from === peer),
+      (m) =>
+        (m.from === me.id && m.to === peer) ||
+        (m.to === me.id && m.from === peer),
     );
     const privateJwk = me.sealedPrivateKey
       ? await openPrivateKey(me.sealedPrivateKey, password)
       : null;
-    const result: { id: string; dir: "in" | "out"; text: string; createdAt: number }[] = [];
+    const result: {
+      id: string;
+      dir: "in" | "out";
+      text: string;
+      createdAt: number;
+    }[] = [];
     for (const m of mine) {
       if (m.from === me.id) {
-        result.push({ id: m.id, dir: "out", text: "(encrypted)", createdAt: m.createdAt });
+        result.push({
+          id: m.id,
+          dir: "out",
+          text: "(encrypted)",
+          createdAt: m.createdAt,
+        });
       } else if (privateJwk) {
         try {
           const text = await decryptWith(privateJwk as Jwk, m.cipherText);
           result.push({ id: m.id, dir: "in", text, createdAt: m.createdAt });
         } catch {
-          result.push({ id: m.id, dir: "in", text: "[unable to decrypt]", createdAt: m.createdAt });
+          result.push({
+            id: m.id,
+            dir: "in",
+            text: "[unable to decrypt]",
+            createdAt: m.createdAt,
+          });
         }
       } else {
-        result.push({ id: m.id, dir: "in", text: "[locked]", createdAt: m.createdAt });
+        result.push({
+          id: m.id,
+          dir: "in",
+          text: "[locked]",
+          createdAt: m.createdAt,
+        });
       }
     }
     return result.sort((a, b) => a.createdAt - b.createdAt);

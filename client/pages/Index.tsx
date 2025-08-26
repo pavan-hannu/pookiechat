@@ -20,29 +20,48 @@ export default function Index() {
                   Realtime, end‑to‑end encrypted chat
                 </h1>
                 <p className="mt-4 text-muted-foreground text-lg">
-                  PookieChat combines secure messaging with social vibes—follow like Instagram, friend requests like Facebook, and admin‑level protection when things look suspicious.
+                  PookieChat combines secure messaging with social vibes—follow
+                  like Instagram, friend requests like Facebook, and admin‑level
+                  protection when things look suspicious.
                 </p>
                 <div className="mt-6 flex gap-3">
                   {me ? (
-                    <Button asChild size="lg"><a href="/chat">Open chat</a></Button>
+                    <Button asChild size="lg">
+                      <a href="/chat">Open chat</a>
+                    </Button>
                   ) : (
                     <AuthDialog>
                       <Button size="lg">Create your account</Button>
                     </AuthDialog>
                   )}
-                  <a href="#how" className="text-sm font-medium text-primary self-center">How it works</a>
+                  <a
+                    href="#how"
+                    className="text-sm font-medium text-primary self-center"
+                  >
+                    How it works
+                  </a>
                 </div>
                 <ul className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                  <li className="rounded-lg border p-3 bg-card">Anyone can sign up</li>
-                  <li className="rounded-lg border p-3 bg-card">E2EE: database only sees ciphertext</li>
-                  <li className="rounded-lg border p-3 bg-card">Django Admin: block suspicious users</li>
-                  <li className="rounded-lg border p-3 bg-card">Follow & friend requests ("pookie")</li>
+                  <li className="rounded-lg border p-3 bg-card">
+                    Anyone can sign up
+                  </li>
+                  <li className="rounded-lg border p-3 bg-card">
+                    E2EE: database only sees ciphertext
+                  </li>
+                  <li className="rounded-lg border p-3 bg-card">
+                    Django Admin: block suspicious users
+                  </li>
+                  <li className="rounded-lg border p-3 bg-card">
+                    Follow & friend requests ("pookie")
+                  </li>
                 </ul>
               </div>
               <div className="rounded-2xl border bg-card p-4 shadow-sm">
                 <div className="mb-3 flex items-center justify-between">
                   <h3 className="font-semibold">Live demo</h3>
-                  <span className="text-xs text-muted-foreground">Open another tab to test realtime</span>
+                  <span className="text-xs text-muted-foreground">
+                    Open another tab to test realtime
+                  </span>
                 </div>
                 <ChatWindow />
               </div>
@@ -55,15 +74,24 @@ export default function Index() {
           <div className="mt-6 grid md:grid-cols-3 gap-6">
             <div className="rounded-xl border bg-card p-5">
               <h4 className="font-semibold">Client‑side keys</h4>
-              <p className="text-sm text-muted-foreground mt-2">Keys are generated in the browser. Private keys are protected with your password and never sent to the server.</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Keys are generated in the browser. Private keys are protected
+                with your password and never sent to the server.
+              </p>
             </div>
             <div className="rounded-xl border bg-card p-5">
               <h4 className="font-semibold">Ciphertext at rest</h4>
-              <p className="text-sm text-muted-foreground mt-2">Messages are encrypted with recipients’ public keys so the database can’t read them.</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Messages are encrypted with recipients’ public keys so the
+                database can’t read them.
+              </p>
             </div>
             <div className="rounded-xl border bg-card p-5">
               <h4 className="font-semibold">Moderation ready</h4>
-              <p className="text-sm text-muted-foreground mt-2">Django Admin can block suspicious accounts without accessing private content.</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Django Admin can block suspicious accounts without accessing
+                private content.
+              </p>
             </div>
           </div>
         </section>
