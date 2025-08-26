@@ -21,7 +21,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <AuthProvider>
+      <SessionProvider>
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
@@ -31,7 +31,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
-      </AuthProvider>
+      </SessionProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
