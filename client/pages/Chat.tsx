@@ -1,130 +1,53 @@
 import Header from "@/components/app/Header";
 import Footer from "@/components/app/Footer";
 import ChatWindow from "@/components/chat/ChatWindow";
-import { useAuth } from "@/store/auth";
-import { Button } from "@/components/ui/button";
+import { useSession } from "@/store/session";
+import { useState } from "react";
+import { Button, Input, List, message } from "antd";
+import { api } from "@/lib/api";
 
 export default function ChatPage() {
-  const {
-    me,
-    users,
-    requests,
-    follow,
-    unfollow,
-    sendRequest,
-    acceptRequest,
-    rejectRequest,
-  } = useAuth();
-  const others = users.filter((u) => (me ? u.id !== me.id : true));
-  const myIncoming = requests.filter(
-    (r) => me && r.to === me.id && r.status === "pending",
-  );
-  const myOutgoing = requests.filter(
-    (r) => me && r.from === me.id && r.status === "pending",
-  );
+  const { me } = useSession();
+  const [q, setQ] = useState("");
+  const [results, setResults] = useState<{ username: string; is_staff: boolean }[]>([]);
+
+  async function onSearch() {
+    try {
+      const res = await api.get(`/users/search/`, { params: { q } });
+      setResults(res.data);
+    } catch {
+      message.error("Search failed");
+    }
+  }
+
+  async function startChat(username: string) {
+    if (!me) return;
+    await api.post("/conversations/", { usernames: [me.username, username] });
+    message.success(`Conversation started with @${username}`);
+  }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen d-flex flex-column">
       <Header />
-      <main className="container mx-auto px-4 py-8 flex-1">
-        <div className="grid lg:grid-cols-3 gap-6">
-          <section className="rounded-xl border bg-card p-4">
-            <h3 className="font-semibold">People</h3>
-            <div className="mt-3 space-y-2">
-              {others.length === 0 && (
-                <p className="text-sm text-muted-foreground">
-                  No users yet. Open a new tab and sign up another user.
-                </p>
-              )}
-              {others.map((u) => {
-                const following = !!me && me.following.includes(u.id);
-                return (
-                  <div
-                    key={u.id}
-                    className="flex items-center justify-between rounded-lg border p-2"
-                  >
-                    <div>
-                      <div className="font-medium">@{u.id}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {u.followers.length} followers • {u.following.length}{" "}
-                        following
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {following ? (
-                        <Button
-                          variant="outline"
-                          onClick={() => unfollow(u.id)}
-                        >
-                          Unfollow
-                        </Button>
-                      ) : (
-                        <Button onClick={() => follow(u.id)}>Follow</Button>
-                      )}
-                      <Button
-                        variant="secondary"
-                        onClick={() => sendRequest(u.id)}
-                      >
-                        Add friend
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })}
+      <main className="container py-4 flex-1">
+        <div className="row g-3 mb-3">
+          <div className="col-md-6">
+            <div className="border rounded p-3">
+              <h5>Find new pookies</h5>
+              <div className="d-flex gap-2 mt-2">
+                <Input placeholder="search usernames" value={q} onChange={(e) => setQ(e.target.value)} />
+                <Button type="primary" onClick={onSearch}>Search</Button>
+              </div>
+              <List className="mt-3" dataSource={results} renderItem={(u) => (
+                <List.Item actions={[<Button key="start" onClick={() => startChat(u.username)}>Start chat</Button>]}>
+                  @{u.username}
+                </List.Item>
+              )} />
             </div>
-          </section>
-
-          <section className="rounded-xl border bg-card p-4">
-            <h3 className="font-semibold">Friend requests</h3>
-            <div className="mt-3 space-y-2">
-              {myIncoming.length === 0 && myOutgoing.length === 0 && (
-                <p className="text-sm text-muted-foreground">
-                  No friend request activity.
-                </p>
-              )}
-              {myIncoming.map((r) => (
-                <div
-                  key={r.id}
-                  className="flex items-center justify-between rounded-lg border p-2"
-                >
-                  <div>
-                    <div className="text-sm">
-                      @{r.from} wants to be your friend
-                    </div>
-                    <div className="text-xs text-muted-foreground">Pending</div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button onClick={() => acceptRequest(r.id)}>Accept</Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => rejectRequest(r.id)}
-                    >
-                      Reject
-                    </Button>
-                  </div>
-                </div>
-              ))}
-              {myOutgoing.map((r) => (
-                <div key={r.id} className="rounded-lg border p-2">
-                  <div className="text-sm">Request sent to @{r.to}</div>
-                  <div className="text-xs text-muted-foreground">Pending</div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="lg:col-span-1 rounded-xl border bg-card p-4">
-            <h3 className="font-semibold">Start chatting</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Pick a person in the chat window and send a message. Messages sent
-              to you require your password to decrypt.
-            </p>
-          </section>
+          </div>
         </div>
 
-        <div className="mt-6">
-          <ChatWindow />
-        </div>
+        <ChatWindow />
       </main>
       <Footer />
     </div>
