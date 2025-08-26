@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "antd";
 import { useSession } from "@/store/session";
 import { Moon, Sun } from "lucide-react";
@@ -6,7 +7,7 @@ import { useEffect, useState } from "react";
 import AuthDialog from "@/components/auth/AuthDialog";
 
 export default function Header() {
-  const { me, logout } = useAuth();
+  const { me, logout } = useSession();
   const [theme, setTheme] = useState<string>(() =>
     typeof document === "undefined"
       ? "light"
@@ -36,24 +37,15 @@ export default function Header() {
           <NavLink to="/settings">Settings</NavLink>
         </nav>
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="toggle theme"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          >
+          <Button type="text" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
             {theme === "dark" ? <Sun /> : <Moon />}
           </Button>
           {me ? (
             <div className="flex items-center gap-3">
               {me.settings?.avatarUrl ? (
-                <img
-                  src={me.settings.avatarUrl}
-                  alt="avatar"
-                  className="h-8 w-8 rounded-full object-cover"
-                />
+                <img src={me.settings.avatarUrl} alt="avatar" className="h-8 w-8 rounded-full object-cover" />
               ) : null}
-              <span className="text-sm text-muted-foreground">@{me.id}</span>
+              <span className="text-sm text-muted-foreground">@{me.username}</span>
               <Button onClick={logout}>Logout</Button>
             </div>
           ) : (
