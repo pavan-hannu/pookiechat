@@ -9,6 +9,8 @@ export type User = {
   following: string[];
   followers: string[];
   blocked?: boolean;
+  settings?: { theme?: "light" | "dark"; avatarUrl?: string };
+  role?: "admin" | "user";
 };
 
 export type FriendRequest = { id: string; from: string; to: string; status: "pending" | "accepted" | "rejected"; createdAt: number };
