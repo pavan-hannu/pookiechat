@@ -32,7 +32,13 @@ export default function AuthDialog({
     setError(null);
     try {
       if (mode === "signup") {
-        const res = await register(username, password, firstName, lastName, profileVisibility);
+        const res = await register(
+          username,
+          password,
+          firstName,
+          lastName,
+          profileVisibility,
+        );
         if (!res.ok) setError(res.error || "Unable to sign up");
         else {
           const ok = await login(username, password);
@@ -86,11 +92,19 @@ export default function AuthDialog({
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="text-sm">First Name</label>
-                  <Input placeholder="First" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                  <Input
+                    placeholder="First"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                  />
                 </div>
                 <div>
                   <label className="text-sm">Last Name</label>
-                  <Input placeholder="Last" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                  <Input
+                    placeholder="Last"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                  />
                 </div>
               </div>
               <div>
@@ -98,7 +112,7 @@ export default function AuthDialog({
                 <Select
                   value={profileVisibility}
                   onChange={setProfileVisibility}
-                  style={{ width: '100%' }}
+                  style={{ width: "100%" }}
                   options={[
                     { value: "public", label: "Public - Anyone can see" },
                     { value: "followers", label: "Followers Only" },

@@ -74,7 +74,7 @@ Key endpoints
 
 ## New Features Added
 
-- **Username Validation**: Only allows letters, numbers, dots (.), and single underscores (_). No double underscores or leading/trailing dots/underscores.
+- **Username Validation**: Only allows letters, numbers, dots (.), and single underscores (\_). No double underscores or leading/trailing dots/underscores.
 - **Extended Registration**: First name, last name, and profile visibility (public/followers/private)
 - **Profile Visibility**: Controls who can see your profile and posts
 - **Admin Blocking**: Django Admin can block users permanently or temporarily with custom reasons and end dates

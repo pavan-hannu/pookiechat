@@ -33,7 +33,7 @@ export default function SettingsPage() {
       await api.post("/profile/", {
         first_name: firstName,
         last_name: lastName,
-        profile_visibility: profileVisibility
+        profile_visibility: profileVisibility,
       });
       await fetchMe();
       message.success("Profile updated");
@@ -53,23 +53,42 @@ export default function SettingsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium">First Name</label>
-                  <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First name" />
+                  <Input
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="First name"
+                  />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Last Name</label>
-                  <Input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Last name" />
+                  <Input
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Last name"
+                  />
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium">Profile Visibility</label>
+                <label className="text-sm font-medium">
+                  Profile Visibility
+                </label>
                 <Select
                   value={profileVisibility}
                   onChange={setProfileVisibility}
-                  style={{ width: '100%' }}
+                  style={{ width: "100%" }}
                   options={[
-                    { value: "public", label: "Public - Anyone can see your profile" },
-                    { value: "followers", label: "Followers Only - Only people you follow back" },
-                    { value: "private", label: "Private - Only you can see your profile" },
+                    {
+                      value: "public",
+                      label: "Public - Anyone can see your profile",
+                    },
+                    {
+                      value: "followers",
+                      label: "Followers Only - Only people you follow back",
+                    },
+                    {
+                      value: "private",
+                      label: "Private - Only you can see your profile",
+                    },
                   ]}
                 />
               </div>
@@ -81,42 +100,42 @@ export default function SettingsPage() {
 
           <div className="rounded-xl border bg-card p-6">
             <h2 className="text-2xl font-bold mb-4">App Settings</h2>
-          <Form layout="vertical" className="mt-6" onFinish={onFinish}>
-            <Form.Item label="Dark mode">
-              <Switch
-                checked={theme === "dark"}
-                onChange={(v) => setTheme(v ? "dark" : "light")}
-              />
-            </Form.Item>
-            <Form.Item label="Avatar (pookie profile)">
-              <Upload
-                name="file"
-                action="/api/accounts/avatar/"
-                withCredentials
-                showUploadList={false}
-                onChange={(info) => {
-                  if (info.file.status === "done") {
-                    setAvatarUrl(info.file.response.avatarUrl);
-                    fetchMe();
-                    message.success("Avatar updated");
-                  }
-                }}
-              >
-                <Button>Upload</Button>
-              </Upload>
-              {avatarUrl && (
-                <img
-                  src={avatarUrl}
-                  alt="avatar"
-                  className="mt-3 rounded"
-                  style={{ height: 64, width: 64, objectFit: "cover" }}
+            <Form layout="vertical" className="mt-6" onFinish={onFinish}>
+              <Form.Item label="Dark mode">
+                <Switch
+                  checked={theme === "dark"}
+                  onChange={(v) => setTheme(v ? "dark" : "light")}
                 />
-              )}
-            </Form.Item>
-            <Button type="primary" htmlType="submit">
-              Save Settings
-            </Button>
-          </Form>
+              </Form.Item>
+              <Form.Item label="Avatar (pookie profile)">
+                <Upload
+                  name="file"
+                  action="/api/accounts/avatar/"
+                  withCredentials
+                  showUploadList={false}
+                  onChange={(info) => {
+                    if (info.file.status === "done") {
+                      setAvatarUrl(info.file.response.avatarUrl);
+                      fetchMe();
+                      message.success("Avatar updated");
+                    }
+                  }}
+                >
+                  <Button>Upload</Button>
+                </Upload>
+                {avatarUrl && (
+                  <img
+                    src={avatarUrl}
+                    alt="avatar"
+                    className="mt-3 rounded"
+                    style={{ height: 64, width: 64, objectFit: "cover" }}
+                  />
+                )}
+              </Form.Item>
+              <Button type="primary" htmlType="submit">
+                Save Settings
+              </Button>
+            </Form>
           </div>
         </div>
       </main>
