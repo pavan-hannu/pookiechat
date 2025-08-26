@@ -11,6 +11,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Chat from "./pages/Chat";
+import Settings from "./pages/Settings";
 import { AuthProvider } from "@/store/auth";
 
 const queryClient = new QueryClient();
