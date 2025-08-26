@@ -1,27 +1,17 @@
-# PookieChat — Secure realtime chat (React + Django + MySQL)
+# PookieChat — Secure chat (React + Django + MySQL)
 
-Production‑grade scaffold for a secure, realtime chat app:
-
-- Frontend: React (JSX), Vite, Ant Design + Bootstrap
-- Backend: Django 5, Django Admin, Django Channels (WebSockets), MySQL, Redis
-- Features: E2EE-ready message storage (ciphertext at rest), follows + friend requests, user settings (theme + avatar), initial admin “pookie”
+- Frontend: React (JSX), Vite, Ant Design + Bootstrap (via CDN)
+- Backend: Django 5 + Django Admin, MySQL, Redis (for Channels if you enable websockets later)
+- Features: session auth, search pookies, conversations, 5s polling for chat lists/messages, settings (theme + avatar upload to media), posts (text/image) with visibility + reach, initial admin “pookie”
 
 ## Prerequisites
-
 - Node.js 18+ and pnpm
 - Python 3.10+ and pip
-- MySQL 8+ (or compatible) and Redis 6+
-
-Optional (local containers):
-
-- Docker Desktop
+- MySQL 8+ and Redis 6+
 
 ## Environment
-
-Create backend/.env (never commit secrets):
-
+Create backend/.env
 ```
-# backend/.env
 DJANGO_SECRET_KEY=change-me
 DEBUG=true
 MYSQL_HOST=127.0.0.1
@@ -32,89 +22,43 @@ MYSQL_PASSWORD=yourpassword
 REDIS_URL=redis://127.0.0.1:6379
 ```
 
-## Quick start
-
-Open two terminals: one for backend (Django) and one for frontend (Vite).
-
-### 1) Backend (Django + Channels)
-
+## Backend (Django)
 ```
-# Create & activate virtualenv
 python -m venv .venv
 # macOS/Linux
 source .venv/bin/activate
-# Windows (PowerShell)
-# .venv\Scripts\Activate.ps1
+# Windows PowerShell: .venv\Scripts\Activate.ps1
 
-# Install deps
 pip install -r backend/requirements.txt
-
-# Configure DB & cache
-# Ensure MySQL and Redis are running and match backend/.env
-
-# Run migrations
 python backend/manage.py migrate
-
-# Create initial admin “pookie” (password: pookie-admin-123)
-python backend/manage.py init_pookie
-
-# Start development server (ASGI via runserver works with Channels 4)
+python backend/manage.py init_pookie   # admin: pookie / pookie-admin-123
 python backend/manage.py runserver 8000
-# Or with Daphne (recommended for websockets)
-# python -m pip install daphne
-# daphne -p 8000 pookiechat.asgi:application
 ```
+Django Admin: http://127.0.0.1:8000/admin/
 
-Django Admin: http://127.0.0.1:8000/admin/ (login: pookie / pookie-admin-123)
-
-WebSocket endpoint: ws://127.0.0.1:8000/ws/chat/<conversation_uuid>/
-
-### 2) Frontend (React + Vite)
-
+## Frontend (Vite)
 ```
 pnpm install
 pnpm dev
 ```
+Dev URL: http://localhost:5173
 
-Default dev URL: http://localhost:5173
-
-### 3) Running MySQL & Redis with Docker (optional)
-
-```
-# MySQL 8
-docker run --name mysql8 -e MYSQL_ROOT_PASSWORD=yourpassword -e MYSQL_DATABASE=pookiechat -p 3306:3306 -d mysql:8
-
-# Redis
-docker run --name redis6 -p 6379:6379 -d redis:6
-```
-
-Update backend/.env to match these credentials.
+## Troubleshooting
+- 403 Forbidden loading CSS from node_modules: Fixed by using CDN CSS (see index.html). We removed direct imports from node_modules in App.tsx.
+- API base: frontend uses relative "/api"; proxy to Django if you run behind one, or serve the SPA with the backend in production.
+- Media (avatars/posts): served in DEBUG via /media/. Ensure MEDIA_ROOT writable.
 
 ## Project Structure
+- client/ — React app
+- backend/ — Django project (apps: accounts, chat, social)
 
-- client/ … React app (JSX) and UI
-- backend/ … Django project (apps: accounts, chat, social)
-
-Key backend commands:
-
-- Migrations: `python backend/manage.py makemigrations && python backend/manage.py migrate`
-- Create superuser: `python backend/manage.py createsuperuser`
-- Seed admin: `python backend/manage.py init_pookie`
+Key endpoints
+- Auth: POST /api/auth/register/, /api/auth/login/, /api/auth/logout/
+- Me/Settings: GET /api/me/, POST /api/settings/, POST /api/accounts/avatar/
+- Users: GET /api/users/search/?q=
+- Chat: GET /api/conversations/list/, POST /api/conversations/, GET/POST /api/conversations/<uuid>/messages(/post)/
+- Posts: GET /api/posts/?username=..., POST /api/posts/create/
 
 ## Notes
-
-- Messages are stored as ciphertext (clients should encrypt before sending). Frontend currently includes local E2EE utilities; wiring to backend API/websocket is straightforward next.
-- For production, run Django behind Daphne/Uvicorn + a reverse proxy, and configure allowed hosts, TLS, and strong secrets.
-
-## Scripts Summary
-
-Frontend:
-
-- `pnpm dev` – start Vite dev server
-- `pnpm build` – build SPA
-- `pnpm start` – run Node server build (starter)
-
-Backend:
-
-- `python backend/manage.py runserver 8000` – dev server
-- `daphne -p 8000 pookiechat.asgi:application` – ASGI server (websockets)
+- We removed Netlify files (netlify/, netlify.toml). Use your preferred hosting for Django and the SPA.
+- For production, run Django on Daphne/Uvicorn behind a reverse proxy, set strong SECRET_KEY, and configure ALLOWED_HOSTS and TLS.
