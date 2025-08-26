@@ -20,6 +20,9 @@ type SessionState = {
   register: (
     username: string,
     password: string,
+    firstName?: string,
+    lastName?: string,
+    profileVisibility?: string,
   ) => Promise<{ ok: boolean; error?: string }>;
   logout: () => Promise<void>;
   updateSettings: (settings: {
