@@ -27,6 +27,7 @@ type AuthState = {
   sendRequest: (to: string) => void;
   acceptRequest: (reqId: string) => void;
   rejectRequest: (reqId: string) => void;
+  updateSettings: (settings: Partial<NonNullable<User["settings"]>>) => void;
 };
 
 const USERS_KEY = "app.users";
@@ -36,7 +37,22 @@ const REQ_KEY = "app.friendRequests";
 const AuthCtx = createContext<AuthState | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [users, setUsers] = useState<User[]>(() => readJSON<User[]>(USERS_KEY, []));
+  const [users, setUsers] = useState<User[]>(() => {
+    const existing = readJSON<User[]>(USERS_KEY, []);
+    if (existing.length > 0) return existing;
+    // initialize default admin 'pookie' with placeholder public key
+    return [
+      {
+        id: "pookie",
+        publicKey: {},
+        following: [],
+        followers: [],
+        blocked: false,
+        role: "admin",
+        settings: { theme: "light", avatarUrl: "https://api.dicebear.com/9.x/fun-emoji/svg?seed=pookie" },
+      },
+    ] as unknown as User[];
+  });
   const [requests, setRequests] = useState<FriendRequest[]>(() => readJSON<FriendRequest[]>(REQ_KEY, []));
   const [me, setMe] = useState<User | null>(() => {
     const id = readJSON<string | null>(SESSION_KEY, null);
